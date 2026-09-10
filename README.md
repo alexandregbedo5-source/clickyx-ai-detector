@@ -22,17 +22,15 @@ Un seul projet Vercel, deux services (fonctionnalité [Vercel Services](https://
 servis sur le même domaine :
 
 ```
-┌─────────────────────── Projet Vercel ────────────────────────┐
-│                                                                │
-│  /            → service frontend   Next.js 16 + Tailwind 4     │
-│                                    pages statiques             │
-│                                          │                     │
-│                                          │ fetch relatif       │
-│                                          ▼                     │
-│  /svc/api/*   → service backend    FastAPI + ai_detector       │
-│                                    GET  /health, /model-info   │
-│                                    POST /detect-image          │
-└────────────────────────────────────────────────────────┘
+Navigateur
+   │
+   ├── /            → service frontend   Next.js 16 + Tailwind 4, pages statiques
+   │                                     │
+   │                                     │ fetch relatif, même origine
+   │                                     ▼
+   └── /svc/api/*   → service backend    FastAPI + ai_detector
+                                         GET  /health, /model-info
+                                         POST /detect-image
 ```
 
 Le navigateur appelle le moteur en **URL relative** (`/svc/api/...`) : même origine, donc pas
