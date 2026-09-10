@@ -1,22 +1,15 @@
 /**
- * URL du service de détection.
+ * Base d'appel du moteur de détection.
  *
- * - Sur Vercel : `BACKEND_URL` est injecté par le binding de service (vercel.json).
- * - En local   : `AI_DETECTOR_BASE_URL`, sinon le moteur lancé par
- *   `python -m ai_detector serve` sur 127.0.0.1:32188.
+ * En production le backend FastAPI est exposé par Vercel sur le même domaine que
+ * le site, sous `/svc/api` (voir la rewrite dans `vercel.json`). Les appels sont
+ * donc relatifs : pas de variable d'environnement à configurer, pas de CORS, et
+ * aucun rebond inutile par une route Next.js.
+ *
+ * `NEXT_PUBLIC_API_BASE` ne sert qu'au développement local, quand le moteur
+ * tourne sur un autre port que le site.
  */
-export const DETECTOR_BASE_URL = (
-  process.env.BACKEND_URL ??
-  process.env.AI_DETECTOR_BASE_URL ??
-  "http://127.0.0.1:32188"
-).replace(/\/$/, "");
+export const API_BASE = (process.env.NEXT_PUBLIC_API_BASE ?? "/svc/api").replace(/\/$/, "");
 
-export const DETECTOR_TOKEN = process.env.AI_DETECTOR_TOKEN ?? "";
-
-export const DETECTOR_TOKEN_HEADER = "x-ai-detector-token";
-
-/**
- * Vercel plafonne le corps d'une requête à 4,5 Mo. L'image est envoyée en binaire
- * brut (pas en base64) pour ne pas perdre un tiers de ce budget.
- */
+/** Plafond runtime Vercel : 4,5 Mo par requête. On garde une marge. */
 export const MAX_IMAGE_BYTES = 4 * 1024 * 1024;

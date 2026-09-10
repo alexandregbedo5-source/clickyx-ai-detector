@@ -1,23 +1,16 @@
-import { DETECTOR_BASE_URL, DETECTOR_TOKEN, DETECTOR_TOKEN_HEADER } from "@/lib/config";
+import { API_BASE } from "@/lib/config";
 import type { ModelData } from "@/lib/model-types";
 
 /**
- * Récupère la fiche du modèle et le rapport de calibration auprès du backend.
- * Appelé côté serveur : le moteur reste privé, jamais exposé au navigateur.
+ * Récupère la fiche du modèle et le rapport de calibration auprès du moteur.
+ * Le premier appel après une mise en veille peut être lent : le service charge
+ * alors le poids ONNX de 16 Mo.
  */
 export async function fetchModelData(): Promise<ModelData> {
-  const headers: Record<string, string> = {};
-  if (DETECTOR_TOKEN) headers[DETECTOR_TOKEN_HEADER] = DETECTOR_TOKEN;
-
-  try {
-    const res = await fetch(`${DETECTOR_BASE_URL}/model-info`, {
-      headers,
-      cache: "no-store",
-      signal: AbortSignal.timeout(8000),
-    });
-    if (!res.ok) return { card: null, calibration: null };
-    return (await res.json()) as ModelData;
-  } catch {
-    return { card: null, calibration: null };
-  }
+  const res = await fetch(`${API_BASE}/model-info`, {
+    cache: "no-store",
+    signal: AbortSignal.timeout(60000),
+  });
+  if (!res.ok) throw new Error(`Le moteur a répondu ${res.status}.`);
+  return (await res.json()) as ModelData;
 }

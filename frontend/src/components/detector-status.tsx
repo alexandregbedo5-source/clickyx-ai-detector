@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { API_BASE } from "@/lib/config";
 import type { HealthResponse } from "@/lib/types";
 
 export function DetectorStatus() {
@@ -10,7 +11,11 @@ export function DetectorStatus() {
     let cancelled = false;
     const load = async () => {
       try {
-        const res = await fetch("/api/health", { cache: "no-store" });
+        const res = await fetch(`${API_BASE}/health`, {
+          cache: "no-store",
+          // Premier appel à froid : le moteur récupère le poids ONNX de 16 Mo.
+          signal: AbortSignal.timeout(60000),
+        });
         const data = (await res.json()) as HealthResponse;
         if (!cancelled) setHealth(data);
       } catch {
@@ -18,7 +23,7 @@ export function DetectorStatus() {
       }
     };
     load();
-    const id = setInterval(load, 15000);
+    const id = setInterval(load, 30000);
     return () => {
       cancelled = true;
       clearInterval(id);
