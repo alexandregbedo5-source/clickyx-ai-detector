@@ -40,7 +40,8 @@ export function VerdictBadge({ isAi, confidence }: VerdictBadgeProps) {
           {isAi ? "Image probablement générée par IA" : "Image probablement authentique"}
         </p>
         <p className="text-sm text-muted">
-          Confiance&nbsp;: <span className="font-mono text-foreground">{pct}%</span>
+          Probabilité qu&apos;elle soit générée par IA&nbsp;:{" "}
+          <span className="font-mono text-foreground">{pct}%</span>
         </p>
       </div>
     </div>
