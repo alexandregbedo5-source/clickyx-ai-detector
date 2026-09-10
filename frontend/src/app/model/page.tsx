@@ -1,8 +1,10 @@
+"use client";
+
+import { useCallback, useEffect, useState } from "react";
 import { ColabPipeline } from "@/components/colab-pipeline";
 import { MetricCard } from "@/components/metric-card";
 import { fetchModelData } from "@/lib/model-data";
-
-export const dynamic = "force-dynamic";
+import type { ModelData } from "@/lib/model-types";
 
 function pct(v: number | undefined): string {
   return v === undefined ? "—" : `${(v * 100).toFixed(1)}%`;
@@ -12,28 +14,39 @@ function auc(v: number | undefined): string {
   return v === undefined ? "—" : v.toFixed(3);
 }
 
-export default async function ModelPage() {
-  const { card, calibration: calib } = await fetchModelData();
+export default function ModelPage() {
+  const [data, setData] = useState<ModelData | null>(null);
+  const [error, setError] = useState<string>("");
 
+  const load = useCallback(async () => {
+    setError("");
+    setData(null);
+    try {
+      setData(await fetchModelData());
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Le moteur est injoignable.");
+    }
+  }, []);
+
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  if (error) return <ModelError message={error} onRetry={load} />;
+  if (!data) return <ModelSkeleton />;
+
+  const card = data.card;
+  const calib = data.calibration;
   const val = (card?.training?.val_metrics ?? {}) as Record<string, number>;
   const fusionFull = (calib?.fusion_full_oof ?? {}) as Record<string, number>;
   const fusionHc = (calib?.fusion_handcrafted_oof ?? {}) as Record<string, number>;
 
   if (!card) {
     return (
-      <div className="mx-auto max-w-6xl px-4 py-16 text-center">
-        <h1 className="text-2xl font-bold">Informations du modèle indisponibles</h1>
-        <p className="mx-auto mt-3 max-w-md text-muted">
-          Le service de détection n&apos;a pas répondu, ou le fichier{" "}
-          <code className="font-mono text-foreground">backend/model/model_card.json</code> est
-          absent.
-        </p>
-        <p className="mx-auto mt-3 max-w-md text-sm text-muted">
-          En local, démarrez le moteur avec{" "}
-          <code className="font-mono text-foreground">python -m ai_detector serve</code>, puis
-          rechargez cette page.
-        </p>
-      </div>
+      <ModelError
+        message="Le moteur a répondu, mais la fiche du modèle (model_card.json) est absente de son dossier model/."
+        onRetry={load}
+      />
     );
   }
 
@@ -230,6 +243,42 @@ export default async function ModelPage() {
           </p>
         </section>
       ) : null}
+    </div>
+  );
+}
+
+function ModelSkeleton() {
+  return (
+    <div className="mx-auto max-w-6xl px-4 py-10">
+      <div className="skeleton h-6 w-56 rounded-full" />
+      <div className="skeleton mt-4 h-10 w-80 rounded-lg" />
+      <div className="skeleton mt-3 h-4 w-full max-w-2xl rounded-full" />
+      <div className="skeleton mt-2 h-4 w-2/3 max-w-xl rounded-full" />
+      <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {[0, 1, 2, 3].map((i) => (
+          <div key={i} className="skeleton h-28 rounded-xl" />
+        ))}
+      </div>
+      <div className="skeleton mt-12 h-64 rounded-xl" />
+      <p className="mt-6 text-center text-sm text-muted">
+        Chargement des métriques d&apos;entraînement… Le premier appel réveille le moteur, cela
+        peut prendre quelques secondes.
+      </p>
+    </div>
+  );
+}
+
+function ModelError({ message, onRetry }: { message: string; onRetry: () => void }) {
+  return (
+    <div className="mx-auto max-w-6xl px-4 py-16 text-center">
+      <h1 className="text-2xl font-bold">Métriques indisponibles</h1>
+      <p className="mx-auto mt-3 max-w-md text-muted">{message}</p>
+      <button
+        onClick={onRetry}
+        className="mt-6 rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[color:var(--primary-strong)]"
+      >
+        Réessayer
+      </button>
     </div>
   );
 }
