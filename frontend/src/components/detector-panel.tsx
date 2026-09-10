@@ -1,11 +1,12 @@
 "use client";
 
 import { useCallback, useRef, useState } from "react";
+import { API_BASE, MAX_IMAGE_BYTES } from "@/lib/config";
 import type { ApiError, DetectResponse } from "@/lib/types";
 import { VerdictBadge } from "@/components/verdict-badge";
 import { ScoreBar } from "@/components/score-bar";
 
-const MAX_BYTES = 4 * 1024 * 1024;
+const MAX_BYTES = MAX_IMAGE_BYTES;
 const ACCEPT = ["image/jpeg", "image/png", "image/webp", "image/bmp", "image/tiff"];
 
 type Status = "idle" | "ready" | "loading" | "done" | "error";
@@ -60,8 +61,8 @@ export function DetectorPanel() {
     (e: React.DragEvent) => {
       e.preventDefault();
       setDragging(false);
-      const dropped = e.dataTransfer.files?.[0];
-      if (dropped) selectFile(dropped);
+      const file = e.dataTransfer.files?.[0];
+      if (file) selectFile(file);
     },
     [selectFile],
   );
@@ -71,10 +72,13 @@ export function DetectorPanel() {
     setStatus("loading");
     setError("");
     try {
-      const res = await fetch("/api/detect", {
+      // Octets bruts plutôt que base64 : l'inflation de 33 % ferait dépasser le
+      // plafond de 4,5 Mo par requête imposé par Vercel.
+      const res = await fetch(`${API_BASE}/detect-image`, {
         method: "POST",
         headers: { "Content-Type": file.type || "application/octet-stream" },
         body: file,
+        signal: AbortSignal.timeout(120000),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -146,8 +150,8 @@ export function DetectorPanel() {
             accept={ACCEPT.join(",")}
             className="hidden"
             onChange={(e) => {
-              const picked = e.target.files?.[0];
-              if (picked) selectFile(picked);
+              const file = e.target.files?.[0];
+              if (file) selectFile(file);
               e.target.value = "";
             }}
           />
@@ -242,12 +246,7 @@ function ErrorState({ message }: { message: string }) {
         style={{ background: "var(--danger-soft)", color: "var(--danger)" }}
       >
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden>
-          <path
-            d="M12 8v5m0 3h.01M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18Z"
-            stroke="currentColor"
-            strokeWidth="1.6"
-            strokeLinecap="round"
-          />
+          <path d="M12 8v5m0 3h.01M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18Z" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
         </svg>
       </div>
       <p className="font-medium">Analyse impossible</p>
