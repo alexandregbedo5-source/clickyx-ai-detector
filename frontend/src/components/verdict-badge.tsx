@@ -1,10 +1,12 @@
+import { formatProbability } from "@/lib/format";
+
 interface VerdictBadgeProps {
   isAi: boolean;
   confidence: number;
 }
 
 export function VerdictBadge({ isAi, confidence }: VerdictBadgeProps) {
-  const pct = Math.round(confidence * 100);
+  const pct = formatProbability(confidence);
   return (
     <div
       className="flex items-center gap-4 rounded-xl border p-4"
@@ -41,7 +43,7 @@ export function VerdictBadge({ isAi, confidence }: VerdictBadgeProps) {
         </p>
         <p className="text-sm text-muted">
           Probabilité qu&apos;elle soit générée par IA&nbsp;:{" "}
-          <span className="font-mono text-foreground">{pct}%</span>
+          <span className="font-mono text-foreground">{pct}</span>
         </p>
       </div>
     </div>

@@ -1,3 +1,5 @@
+import { formatProbability } from "@/lib/format";
+
 interface ScoreBarProps {
   label: string;
   value: number;
@@ -11,17 +13,17 @@ function colorFor(value: number): string {
 }
 
 export function ScoreBar({ label, value, description }: ScoreBarProps) {
-  const pct = Math.round(Math.min(1, Math.max(0, value)) * 100);
+  const width = Math.round(Math.min(1, Math.max(0, value)) * 100);
   return (
     <div>
       <div className="mb-1.5 flex items-baseline justify-between">
         <span className="text-sm font-medium">{label}</span>
-        <span className="font-mono text-sm text-muted">{pct}%</span>
+        <span className="font-mono text-sm text-muted">{formatProbability(value)}</span>
       </div>
       <div className="h-2.5 w-full overflow-hidden rounded-full bg-surface-2">
         <div
           className="h-full rounded-full transition-[width] duration-700 ease-out"
-          style={{ width: `${pct}%`, background: colorFor(value) }}
+          style={{ width: `${width}%`, background: colorFor(value) }}
         />
       </div>
       {description ? (
