@@ -1,5 +1,9 @@
-# Dépendances du service de détection (inférence CPU, hors ligne).
-# Installées par Vercel au build du service `backend`.
+# Le moteur de détection est installé directement depuis le dépôt clickyX :
+# une seule source de vérité, aucun code dupliqué dans ce dépôt.
+clickyx-ai-detector @ git+https://github.com/alexandregbedo5-source/clickyX.git@master
+
+# Dépendances d'exécution, épinglées ici pour rester maîtres des versions
+# installées dans la fonction (numpy 3 introduirait des ruptures d'API).
 numpy>=1.26,<3
 scipy>=1.11
 pillow>=10.0
