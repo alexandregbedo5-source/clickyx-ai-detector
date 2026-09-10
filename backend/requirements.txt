@@ -1,0 +1,8 @@
+# Dépendances du service de détection (inférence CPU, hors ligne).
+# Installées par Vercel au build du service `backend`.
+numpy>=1.26,<3
+scipy>=1.11
+pillow>=10.0
+onnxruntime>=1.17
+fastapi>=0.110
+pydantic>=2.6
