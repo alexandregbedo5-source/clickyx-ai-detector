@@ -1,0 +1,88 @@
+@import "tailwindcss";
+
+:root {
+  --background: #070b14;
+  --surface: #0d1526;
+  --surface-2: #121d33;
+  --border: #1e2c49;
+  --foreground: #e7edf7;
+  --muted: #93a1bd;
+  --primary: #4f8cff;
+  --primary-strong: #2f6bff;
+  --danger: #ff5d6c;
+  --danger-soft: #3a1620;
+  --success: #37d39a;
+  --success-soft: #10281f;
+  --warning: #ffb020;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-border: var(--border);
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-primary: var(--primary);
+  --color-primary-strong: var(--primary-strong);
+  --color-danger: var(--danger);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+* {
+  border-color: var(--border);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background:
+    radial-gradient(1200px 600px at 80% -10%, rgba(79, 140, 255, 0.12), transparent 60%),
+    radial-gradient(900px 500px at 0% 0%, rgba(55, 211, 154, 0.07), transparent 55%),
+    var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+@keyframes shimmer {
+  0% { background-position: -400px 0; }
+  100% { background-position: 400px 0; }
+}
+
+.skeleton {
+  background: linear-gradient(90deg, var(--surface-2) 25%, #1a2740 50%, var(--surface-2) 75%);
+  background-size: 800px 100%;
+  animation: shimmer 1.4s infinite linear;
+}
+
+@keyframes scan {
+  0% { transform: translateY(-100%); opacity: 0; }
+  50% { opacity: 1; }
+  100% { transform: translateY(100%); opacity: 0; }
+}
+
+.scanline::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent, rgba(79, 140, 255, 0.35), transparent);
+  height: 40%;
+  animation: scan 1.6s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.fade-up {
+  animation: fadeUp 0.4s ease both;
+}
